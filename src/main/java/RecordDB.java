@@ -32,13 +32,20 @@ public class RecordDB {
     void createTable() {
 
         try (Connection connection = DriverManager.getConnection(DB_CONNECTION_URL, USER, PASSWORD);
-             Statement statement = connection.createStatement()) {
+             Statement statement = connection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_UPDATABLE)) {
 
-            String createSQLTableTemplate = "CREATE TABLE IF NOT EXISTS %s (%s int NOT NULL AUTO_INCREMENT, %s VARCHAR (50), %s VARCHAR(20), %s VARCHAR(50)," +
-                    "%s VARCHAR(20), %s DOUBLE, %s TIMESTAMP, PRIMARY KEY(%s))";
-            String createSQLTable = String.format(createSQLTableTemplate, TABLE_NAME, PK_COLUMN, CONSIGNOR_NAME_COLUMN,PHONE_NO_COLUMN,ARTIST_NAME_COLUMN,TITLE_COLUMN,PRICE_COLUMN,DATE_COLUMN,PK_COLUMN);
+            String createInventoryTableSQL = "CREATE TABLE IF NOT EXISTS " + TABLE_NAME + "(" + PK_COLUMN + " int NOT NULL AUTO_INCREMENT,"
+                    + CONSIGNOR_NAME_COLUMN + " VARCHAR(50)," + PHONE_NO_COLUMN + " VARCHAR(12)," + ARTIST_NAME_COLUMN + " VARCHAR(50),"
+                    + TITLE_COLUMN + " VARCHAR(50)," + PRICE_COLUMN + " DOUBLE,"+ DATE_COLUMN +" TIMESTAMP, PRIMARY KEY(" + PK_COLUMN + "))";
+            statement.executeUpdate(createInventoryTableSQL);
 
-            statement.executeUpdate(createSQLTable);
+            String createSoldItemTableSQL = "CREATE TABLE IF NOT EXISTS SoldItem(SoldID INT NOT NULL AUTO_INCREMENT, Consignor VARCHAR(20) NOT NULL," +
+                    "SoldPrice DOUBLE NOT NULL, Title VARCHAR(20), PRIMARY KEY(SoldID))";
+            statement.executeUpdate(createSoldItemTableSQL);
+
+            String createPayInfoSQLTable = "CREATE TABLE IF NOT EXISTS PayInfo(Consignor VARCHAR(50) NOT NULL, AmountPaid DOUBLE NOT NULL," +
+                    "BalanceDue DOUBLE NOT NULL)";
+            statement.executeUpdate(createPayInfoSQLTable);
 
             statement.close();
             connection.close();
@@ -51,22 +58,16 @@ public class RecordDB {
     void addRecord(RecordObject recordObject)  {
 
         try (Connection connection = DriverManager.getConnection(DB_CONNECTION_URL, USER, PASSWORD)) {
+            Statement statement = connection.createStatement();
+            String addSQLrecordObject = "INSERT INTO " + TABLE_NAME + "(" + CONSIGNOR_NAME_COLUMN + ", "+ PHONE_NO_COLUMN + ", " + ARTIST_NAME_COLUMN + ", " + TITLE_COLUMN + ", " + PRICE_COLUMN + ", " + DATE_COLUMN + ")" + " VALUES ('" + recordObject.consignorName + "' , '"
+                    + recordObject.phone + "','" + recordObject.artistName + "','" + recordObject.title + "','"
+                    + recordObject.price +"','" + recordObject.date + "')" ;
 
-            String addSQLrecordObject = "INSERT INTO " + TABLE_NAME + " VALUES ( ? , ? , ? , ? , ? , ? , ?) " ;
-            PreparedStatement addSQLrecordObjectRecord = connection.prepareStatement(addSQLrecordObject);
-            addSQLrecordObjectRecord.setInt(1,2);
-            addSQLrecordObjectRecord.setString(2, recordObject.consignorName);
-            addSQLrecordObjectRecord.setString(3, recordObject.phone);
-            addSQLrecordObjectRecord.setString(4,recordObject.artistName);
-            addSQLrecordObjectRecord.setString(5,recordObject.title);
-            addSQLrecordObjectRecord.setDouble(6,recordObject.price);
-            addSQLrecordObjectRecord.setDate(7,recordObject.date);
-
-            addSQLrecordObjectRecord.execute();
+            statement.executeUpdate(addSQLrecordObject);
 
             //TO DO add a message dialog box with "Added cube solver record for 'cubesolver name'" message.
 
-            addSQLrecordObjectRecord.close();
+            statement.close();
             connection.close();
 
         } catch (SQLException se) {
@@ -74,9 +75,19 @@ public class RecordDB {
         }
 
     }
+    void addRecordToSoldItemTable(RecordObjectSold recordObjectSold){
+        try (Connection connection = DriverManager.getConnection(DB_CONNECTION_URL,USER,PASSWORD)){
+            Statement statement = connection.createStatement();
+            String addSQLDataToSoldTable = "INSERT INTO SoldItem(Consignor,SoldPrice, Title) VALUES ('"+recordObjectSold.Consignor + "','"+ recordObjectSold.SoldPrice +"','"+recordObjectSold.title+"')";
+            statement.executeUpdate(addSQLDataToSoldTable);
+        }catch (SQLException sql){
+            sql.printStackTrace();
+        }
+    }
    // defines method that deletes data from the database
     void delete(RecordObject recordObject){
         try(Connection connection = DriverManager.getConnection(DB_CONNECTION_URL, USER, PASSWORD)){
+            Statement statement = connection.createStatement();
             String deleteSQLrecordObject = "DELETE FROM %s WHERE %s = ? AND %s = ? AND %s = ? AND %s = ? AND %s = ? AND %s = ?";
             String deleteSQLrecordObjectRecord = String.format(deleteSQLrecordObject,TABLE_NAME,CONSIGNOR_NAME_COLUMN,PHONE_NO_COLUMN,ARTIST_NAME_COLUMN,TITLE_COLUMN,PRICE_COLUMN,DATE_COLUMN);
             PreparedStatement deletePreparedStatement = connection.prepareStatement(deleteSQLrecordObjectRecord);

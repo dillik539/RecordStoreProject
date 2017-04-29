@@ -1,13 +1,10 @@
 
 
 import javax.swing.*;
-import javax.swing.table.AbstractTableModel;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.LinkedList;
 
 /**
  * Created by dilli on 4/17/2017.
@@ -26,25 +23,30 @@ public class Record extends JFrame{
     private JComboBox ReturnComboBox;
     private JButton deleteRecordButton;
     private JList<RecordObject> InventoryJList;
-    private JList<RecordObject> SoldItemJList;
+    private JList<RecordObjectSold> SoldItemJList;
     private JList<RecordObject> DonatedItemJList;
     private JList<RecordObject> PayInfoJList;
     private JLabel DisplayDaysJLabel;
     private JButton displayNoOfDaysButton;
-    private DefaultListModel<RecordObject> DisplayListModel;
+    private JLabel NotifyConsignorLabel;
+    private DefaultListModel<RecordObject> InventoryListModel;
+    private DefaultListModel<RecordObjectSold> SoldItemListModel;
     private RecordDBcontroller recordDBcontroller;
 
     Record(RecordDBcontroller recordDBcontroller){
         setPreferredSize(new Dimension(800,400));
         this.recordDBcontroller = recordDBcontroller;
-        DisplayListModel = new DefaultListModel<RecordObject>();
-        InventoryJList.setModel(DisplayListModel);
+        InventoryListModel = new DefaultListModel<RecordObject>();
+        SoldItemListModel = new DefaultListModel<RecordObjectSold>();
+        InventoryJList.setModel(InventoryListModel);
+        SoldItemJList.setModel(SoldItemListModel);
         setContentPane(rootPanel);
         addItemsToComboBox();
         pack();
         setVisible(true);
         addListeners();
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
     }
     private void addItemsToComboBox(){
         AddToComboBox.addItem("Inventory");
@@ -70,49 +72,64 @@ public class Record extends JFrame{
 
                 String cName = ConsignorNameTextField.getText();
                 String phone = PhoneNoTextField.getText();
-                String aName = ArtistNameTextField.getText();
+               String aName = ArtistNameTextField.getText();
                 String title = TitleTextField.getText();
                 java.util.Date recordDate = new java.util.Date();
                 java.sql.Date sqlrecordDate = new java.sql.Date(recordDate.getTime());
-
-                if (cName.isEmpty()) {
-                    JOptionPane.showMessageDialog(Record.this, "Enter Consignor's name");
-                    return;
-                }else if(phone.isEmpty()){
-                    JOptionPane.showMessageDialog(Record.this,"Enter the phone number");
-                    return;
-                }else if(aName.isEmpty()){
-                    JOptionPane.showMessageDialog(Record.this,"Enter name of the artist");
-                    return;
-                }else if(title.isEmpty()){
-                    JOptionPane.showMessageDialog(Record.this,"Enter the title");
-                    return;
-                }
-                double price;
-
-                try {
-                    price = Double.parseDouble(PriceTextField.getText());
-                } catch (NumberFormatException nfe) {
-                    JOptionPane.showMessageDialog(Record.this, "Enter the number for price");
-                    return;
-                }
                 if(AddToComboBox.getSelectedItem().equals("Inventory")) {
+                    if (cName.isEmpty()) {
+                        JOptionPane.showMessageDialog(Record.this, "Enter Consignor's name");
+                        return;
+                    }else if(phone.isEmpty()){
+                        JOptionPane.showMessageDialog(Record.this,"Enter the phone number");
+                        return;
+                    }else if(aName.isEmpty()){
+                        JOptionPane.showMessageDialog(Record.this,"Enter name of the artist");
+                        return;
+                    }else if(title.isEmpty()){
+                        JOptionPane.showMessageDialog(Record.this,"Enter the title");
+                        return;
+                    }
+                    double price;
+
+                    try {
+                        price = Double.parseDouble(PriceTextField.getText());
+                    } catch (NumberFormatException nfe) {
+                        JOptionPane.showMessageDialog(Record.this, "Enter the number for price");
+                        return;
+                    }
                     RecordObject recordObjectRecord = new RecordObject(cName, phone, aName, title, price,sqlrecordDate);
                     recordDBcontroller.addRecordToDatabase(recordObjectRecord);
-                }else {
-                    JOptionPane.showMessageDialog(Record.this,"Please select Inventory from Add To combo box");
-                    return;
-                }
-                //Clear input JTextFields
-                ConsignorNameTextField.setText("");
-                PhoneNoTextField.setText("");
-                ArtistNameTextField.setText("");
-                TitleTextField.setText("");
-                PriceTextField.setText("");
+                    //Clear input JTextFields
+                    ConsignorNameTextField.setText("");
+                    PhoneNoTextField.setText("");
+                    ArtistNameTextField.setText("");
+                    TitleTextField.setText("");
+                    PriceTextField.setText("");
 
-                //request all data from database to update list
-                ArrayList<RecordObject> allData = recordDBcontroller.getAllData();
-                setListData(allData);
+                    //request all data from database to update list
+                    ArrayList<RecordObject> allData = recordDBcontroller.getAllData();
+                    setListData(allData);
+                }
+//                else {
+//                    JOptionPane.showMessageDialog(Record.this,"Please select Inventory from Add To combo box");
+//                    return;
+//                }
+                if (AddToComboBox.getSelectedItem().equals("Sold Item") && InventoryJList.getSelectedValue()!=null){
+                    String sPriceString = JOptionPane.showInputDialog(Record.this,"Please enter the selling price");
+                    double sPrice = Double.parseDouble(sPriceString);
+                    RecordObject recordSold = InventoryJList.getSelectedValue();
+                    String sTitle = recordSold.getTitle();
+                    String consignorName = recordSold.getConsignorName();
+                    RecordObjectSold recordObjectSold = new RecordObjectSold(consignorName,sPrice,sTitle);
+                    recordDBcontroller.addRecordToSoldTable(recordObjectSold);
+                    //RecordObject ro = InventoryJList.getSelectedValue();
+                    SoldItemListModel.addElement(recordObjectSold);
+                }
+//                else{
+//                    JOptionPane.showMessageDialog(Record.this,"Oops! missing correct selection");
+//                }
+
             }
         });
         deleteRecordButton.addActionListener(new ActionListener() {
@@ -139,14 +156,26 @@ public class Record extends JFrame{
     }
     private void displayNumberOfDays(){
         java.sql.Date displayDays = InventoryJList.getSelectedValue().getDate();
-        java.lang.String displayDaysString = displayDays.toString();
-        DisplayDaysJLabel.setText(displayDaysString);
+        Date now = new Date();
+        long date = now.getTime() - displayDays.getTime();
+        long msInDay = 1000*60*60*24;
+        long days = date/msInDay;
+        String StringDays = Long.toString(days);
+        int intDays = Integer.parseInt(StringDays);
+        DisplayDaysJLabel.setText(StringDays);
+        if(intDays>30){
+            NotifyConsignorLabel.setText("Notify consignor to pick item");
+        }else{
+            int daysDiff = 30-intDays;
+            String daysDiffString = Integer.toString(daysDiff);
+            NotifyConsignorLabel.setText(daysDiffString+" days to stay in this list");
+        }
     }
     void setListData(ArrayList<RecordObject> data) {
-        DisplayListModel.clear();
+        InventoryListModel.clear();
         //add cubes object to display list model.
         for (RecordObject rob : data) {
-            DisplayListModel.addElement(rob);
+            InventoryListModel.addElement(rob);
         }
     }
 }

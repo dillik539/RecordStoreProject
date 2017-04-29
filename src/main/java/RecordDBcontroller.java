@@ -32,5 +32,8 @@ public class RecordDBcontroller {
     void addRecordToDatabase(RecordObject recordObject) {
         recordDB.addRecord(recordObject);
     }
+    void addRecordToSoldTable(RecordObjectSold recordObjectSold){
+        recordDB.addRecordToSoldItemTable(recordObjectSold);
+    }
 
 }
