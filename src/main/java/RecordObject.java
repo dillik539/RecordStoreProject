@@ -72,35 +72,3 @@ public class RecordObject {
         return "Consignor: "+consignorName + "   Phone: "+phone + "   Artist: "+artistName + "   Title: "+title + "   Price: "+price;
     }
 }
- class RecordObjectSold {
-    String Consignor;
-    double SoldPrice;
-    String title;
-
-     public double getSoldPrice() {
-         return SoldPrice;
-     }
-
-     public void setSoldPrice(double soldPrice) {
-         SoldPrice = soldPrice;
-     }
-
-     public String getTitle() {
-         return title;
-     }
-
-     public void setTitle(String title) {
-         this.title = title;
-     }
-
-     RecordObjectSold(String cName,double sPrice, String t) {
-         Consignor = cName;
-         SoldPrice = sPrice;
-         title = t;
-
-     }
-     @Override
-     public String toString(){
-         return "Consignor: "+ Consignor+ "Title: "+ title + "Sold Price: "+SoldPrice;
-     }
- }

@@ -18,6 +18,12 @@ public class RecordDB {
     private static final String TITLE_COLUMN = "Title";
     private static final String PRICE_COLUMN = "Price";
     private static final String DATE_COLUMN = "RecordDate";
+
+    private static final String SOLD_TABLE_NAME = "SoldItem";
+    private static final String SOLD_PK_COL = "SoldID";
+    private static final String SOLD_CON_NAME_COL = "ConsignorName";
+    private static final String SOLD_SOLD_PRICE_COL = "SoldPrice";
+    private static final String SOLD_TITLE_COL = "Title";
     //constructor
     RecordDB() {
         try {
@@ -39,13 +45,13 @@ public class RecordDB {
                     + TITLE_COLUMN + " VARCHAR(50)," + PRICE_COLUMN + " DOUBLE,"+ DATE_COLUMN +" TIMESTAMP, PRIMARY KEY(" + PK_COLUMN + "))";
             statement.executeUpdate(createInventoryTableSQL);
 
-            String createSoldItemTableSQL = "CREATE TABLE IF NOT EXISTS SoldItem(SoldID INT NOT NULL AUTO_INCREMENT, Consignor VARCHAR(20) NOT NULL," +
-                    "SoldPrice DOUBLE NOT NULL, Title VARCHAR(20), PRIMARY KEY(SoldID))";
+            String createSoldItemTableSQL = "CREATE TABLE IF NOT EXISTS " + SOLD_TABLE_NAME + "(" + SOLD_PK_COL + " INT NOT NULL AUTO_INCREMENT,"
+            + SOLD_CON_NAME_COL + " VARCHAR(50)," + SOLD_SOLD_PRICE_COL + " DOUBLE," + SOLD_TITLE_COL +" VARCHAR(50), PRIMARY KEY(" + SOLD_PK_COL + "))";
             statement.executeUpdate(createSoldItemTableSQL);
 
-            String createPayInfoSQLTable = "CREATE TABLE IF NOT EXISTS PayInfo(Consignor VARCHAR(50) NOT NULL, AmountPaid DOUBLE NOT NULL," +
-                    "BalanceDue DOUBLE NOT NULL)";
-            statement.executeUpdate(createPayInfoSQLTable);
+//            String createPayInfoSQLTable = "CREATE TABLE IF NOT EXISTS PayInfo(Consignor VARCHAR(50) NOT NULL, AmountPaid DOUBLE NOT NULL," +
+//                    "BalanceDue DOUBLE NOT NULL)";
+//            statement.executeUpdate(createPayInfoSQLTable);
 
             statement.close();
             connection.close();
@@ -78,8 +84,11 @@ public class RecordDB {
     void addRecordToSoldItemTable(RecordObjectSold recordObjectSold){
         try (Connection connection = DriverManager.getConnection(DB_CONNECTION_URL,USER,PASSWORD)){
             Statement statement = connection.createStatement();
-            String addSQLDataToSoldTable = "INSERT INTO SoldItem(Consignor,SoldPrice, Title) VALUES ('"+recordObjectSold.Consignor + "','"+ recordObjectSold.SoldPrice +"','"+recordObjectSold.title+"')";
+            String addSQLDataToSoldTable = "INSERT INTO " + SOLD_TABLE_NAME + "(" + SOLD_CON_NAME_COL + ","+ SOLD_SOLD_PRICE_COL+ ","+ SOLD_TITLE_COL+")" + " VALUES ('"+recordObjectSold.Consignor + "','"
+                    + recordObjectSold.SoldPrice +"','"+recordObjectSold.title+ "')";
             statement.executeUpdate(addSQLDataToSoldTable);
+            statement.close();
+            connection.close();
         }catch (SQLException sql){
             sql.printStackTrace();
         }
@@ -141,6 +150,25 @@ public class RecordDB {
             return allRecords;
         } catch (SQLException se) {
             se.printStackTrace();
+            return null;
+        }
+    }
+    ArrayList<RecordObjectSold> fetchAllSoldRecords(){
+        ArrayList<RecordObjectSold> allSoldRecords = new ArrayList<>();
+        try(Connection connection = DriverManager.getConnection(DB_CONNECTION_URL,USER,PASSWORD);
+        Statement statement = connection.createStatement()){
+            String selectSQLSoldTable = "SELECT * FROM " + SOLD_TABLE_NAME;
+            ResultSet rs = statement.executeQuery(selectSQLSoldTable);
+            while (rs.next()){
+                String cName = rs.getString(SOLD_CON_NAME_COL);
+                double sPrice = rs.getDouble(SOLD_SOLD_PRICE_COL);
+                String Title = rs.getString(SOLD_TITLE_COL);
+                RecordObjectSold recordObjectSold = new RecordObjectSold(cName,sPrice,Title);
+                allSoldRecords.add(recordObjectSold);
+            }
+            return allSoldRecords;
+        }catch (SQLException sql){
+            sql.printStackTrace();
             return null;
         }
     }

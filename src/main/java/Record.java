@@ -124,7 +124,10 @@ public class Record extends JFrame{
                     RecordObjectSold recordObjectSold = new RecordObjectSold(consignorName,sPrice,sTitle);
                     recordDBcontroller.addRecordToSoldTable(recordObjectSold);
                     //RecordObject ro = InventoryJList.getSelectedValue();
-                    SoldItemListModel.addElement(recordObjectSold);
+                    //SoldItemListModel.addElement(recordObjectSold);
+
+                    ArrayList<RecordObjectSold> allSoldData = recordDBcontroller.getAllSoldData();
+                    setListOfSoldData(allSoldData);
                 }
 //                else{
 //                    JOptionPane.showMessageDialog(Record.this,"Oops! missing correct selection");
@@ -153,6 +156,11 @@ public class Record extends JFrame{
                 displayNumberOfDays();
             }
         });
+        showRecordButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+            }
+        });
     }
     private void displayNumberOfDays(){
         java.sql.Date displayDays = InventoryJList.getSelectedValue().getDate();
@@ -176,6 +184,12 @@ public class Record extends JFrame{
         //add cubes object to display list model.
         for (RecordObject rob : data) {
             InventoryListModel.addElement(rob);
+        }
+    }
+    void setListOfSoldData(ArrayList<RecordObjectSold> soldData){
+        //SoldItemListModel.clear();
+        for(RecordObjectSold robs : soldData){
+            SoldItemListModel.addElement(robs);
         }
     }
 }

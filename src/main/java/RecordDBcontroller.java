@@ -28,6 +28,9 @@ public class RecordDBcontroller {
     ArrayList<RecordObject> getAllData() {
         return recordDB.fetchAllRecords();
     }
+    ArrayList<RecordObjectSold> getAllSoldData(){
+        return recordDB.fetchAllSoldRecords();
+    }
 
     void addRecordToDatabase(RecordObject recordObject) {
         recordDB.addRecord(recordObject);
