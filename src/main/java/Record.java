@@ -69,7 +69,6 @@ public class Record extends JFrame{
             public void actionPerformed(ActionEvent e) {
 
                 //Read data, send message to database via controller
-
                 String cName = ConsignorNameTextField.getText();
                 String phone = PhoneNoTextField.getText();
                String aName = ArtistNameTextField.getText();
@@ -106,10 +105,8 @@ public class Record extends JFrame{
                     ArtistNameTextField.setText("");
                     TitleTextField.setText("");
                     PriceTextField.setText("");
+                    JOptionPane.showMessageDialog(Record.this,"A record has been add to inventory list");
 
-                    //request all data from database to update list
-                    ArrayList<RecordObject> allData = recordDBcontroller.getAllData();
-                    setListData(allData);
                 }
 //                else {
 //                    JOptionPane.showMessageDialog(Record.this,"Please select Inventory from Add To combo box");
@@ -120,14 +117,15 @@ public class Record extends JFrame{
                     double sPrice = Double.parseDouble(sPriceString);
                     RecordObject recordSold = InventoryJList.getSelectedValue();
                     String sTitle = recordSold.getTitle();
+                    int sID = recordSold.getID();
                     String consignorName = recordSold.getConsignorName();
-                    RecordObjectSold recordObjectSold = new RecordObjectSold(consignorName,sPrice,sTitle);
+                    RecordObjectSold recordObjectSold = new RecordObjectSold(sID,sPrice,sTitle);
                     recordDBcontroller.addRecordToSoldTable(recordObjectSold);
+                    recordDBcontroller.delete(recordSold);//deletes selected object from Inventory list after it is added to sold item list.
+                    JOptionPane.showMessageDialog(Record.this,"The selected item has been moved to sold item list");
                     //RecordObject ro = InventoryJList.getSelectedValue();
                     //SoldItemListModel.addElement(recordObjectSold);
 
-                    ArrayList<RecordObjectSold> allSoldData = recordDBcontroller.getAllSoldData();
-                    setListOfSoldData(allSoldData);
                 }
 //                else{
 //                    JOptionPane.showMessageDialog(Record.this,"Oops! missing correct selection");
@@ -135,18 +133,38 @@ public class Record extends JFrame{
 
             }
         });
+        showRecordButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if(DisplayComboBox.getSelectedItem().equals("All Inventory Records")){
+                    //request all data from database to update list
+                    ArrayList<RecordObject> allData = recordDBcontroller.getAllData();
+                    setListData(allData);
+                }
+                if(DisplayComboBox.getSelectedItem().equals("Sold Items")){
+                    ArrayList<RecordObjectSold> allSoldData = recordDBcontroller.getAllSoldData();
+                    setListOfSoldData(allSoldData);
+                }
+            }
+        });
         deleteRecordButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 RecordObject recordObject = InventoryJList.getSelectedValue();
-                if(recordObject ==null) {
+                if (recordObject == null) {
                     JOptionPane.showMessageDialog(Record.this, "Please select the record to delete");
-                }else if(!ReturnComboBox.getSelectedItem().equals("Yes")){
-                    JOptionPane.showMessageDialog(Record.this,"Please select 'Yes' from the 'Return to Consignor?' combox box");
-                }else {
-                    recordDBcontroller.delete(recordObject);
-                    ArrayList<RecordObject> recordObject1 = recordDBcontroller.getAllData();
-                    setListData(recordObject1);
+                } else if (!ReturnComboBox.getSelectedItem().equals("Yes")) {
+                    JOptionPane.showMessageDialog(Record.this, "Please select 'Yes' from the 'Return to Consignor?' combox box");
+                }
+                if (recordObject!=null && ReturnComboBox.getSelectedItem().equals("Yes")){
+                    int delete = JOptionPane.showConfirmDialog(Record.this, "Are you sure you want to delete this item?",
+                            "Delete", JOptionPane.OK_CANCEL_OPTION);
+                    if(delete == JOptionPane.OK_OPTION) {
+                        recordDBcontroller.delete(recordObject);
+                        ArrayList<RecordObject> recordObject1 = recordDBcontroller.getAllData();
+                        setListData(recordObject1);
+                        JOptionPane.showMessageDialog(Record.this, "The selected item has been deleted from the list");
+                    }
                 }
             }
         });

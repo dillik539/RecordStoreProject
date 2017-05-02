@@ -13,9 +13,9 @@ public class RecordDBcontroller {
     private void startApp(){
         recordDB = new RecordDB();
         recordDB.createTable();
-        ArrayList<RecordObject> allData = recordDB.fetchAllRecords();
+        //ArrayList<RecordObject> allData = recordDB.fetchAllRecords();
         record = new Record(this);
-        record.setListData(allData);
+        //record.setListData(allData);
     }
     void delete(RecordObject recordObject){
         recordDB.delete(recordObject);

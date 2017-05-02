@@ -21,7 +21,7 @@ public class RecordDB {
 
     private static final String SOLD_TABLE_NAME = "SoldItem";
     private static final String SOLD_PK_COL = "SoldID";
-    private static final String SOLD_CON_NAME_COL = "ConsignorName";
+    private static final String SOLD_CON_ID_COL = "ConsignorID";
     private static final String SOLD_SOLD_PRICE_COL = "SoldPrice";
     private static final String SOLD_TITLE_COL = "Title";
     //constructor
@@ -46,7 +46,7 @@ public class RecordDB {
             statement.executeUpdate(createInventoryTableSQL);
 
             String createSoldItemTableSQL = "CREATE TABLE IF NOT EXISTS " + SOLD_TABLE_NAME + "(" + SOLD_PK_COL + " INT NOT NULL AUTO_INCREMENT,"
-            + SOLD_CON_NAME_COL + " VARCHAR(50)," + SOLD_SOLD_PRICE_COL + " DOUBLE," + SOLD_TITLE_COL +" VARCHAR(50), PRIMARY KEY(" + SOLD_PK_COL + "))";
+            + SOLD_CON_ID_COL + " INT," + SOLD_SOLD_PRICE_COL + " DOUBLE," + SOLD_TITLE_COL +" VARCHAR(50), PRIMARY KEY(" + SOLD_PK_COL + "))";
             statement.executeUpdate(createSoldItemTableSQL);
 
 //            String createPayInfoSQLTable = "CREATE TABLE IF NOT EXISTS PayInfo(Consignor VARCHAR(50) NOT NULL, AmountPaid DOUBLE NOT NULL," +
@@ -84,7 +84,7 @@ public class RecordDB {
     void addRecordToSoldItemTable(RecordObjectSold recordObjectSold){
         try (Connection connection = DriverManager.getConnection(DB_CONNECTION_URL,USER,PASSWORD)){
             Statement statement = connection.createStatement();
-            String addSQLDataToSoldTable = "INSERT INTO " + SOLD_TABLE_NAME + "(" + SOLD_CON_NAME_COL + ","+ SOLD_SOLD_PRICE_COL+ ","+ SOLD_TITLE_COL+")" + " VALUES ('"+recordObjectSold.Consignor + "','"
+            String addSQLDataToSoldTable = "INSERT INTO " + SOLD_TABLE_NAME + "(" + SOLD_CON_ID_COL + ","+ SOLD_SOLD_PRICE_COL+ ","+ SOLD_TITLE_COL+")" + " VALUES ('"+recordObjectSold.ConsignorID + "','"
                     + recordObjectSold.SoldPrice +"','"+recordObjectSold.title+ "')";
             statement.executeUpdate(addSQLDataToSoldTable);
             statement.close();
@@ -136,6 +136,7 @@ public class RecordDB {
             String selectSQLtable = "SELECT * FROM " + TABLE_NAME;
             ResultSet rs = statement.executeQuery(selectSQLtable);
             while (rs.next()) {
+                int id = rs.getInt(PK_COLUMN);
                 String cName = rs.getString(CONSIGNOR_NAME_COLUMN);
                 String phone = rs.getString(PHONE_NO_COLUMN);
                 String aName = rs.getString(ARTIST_NAME_COLUMN);
@@ -160,10 +161,10 @@ public class RecordDB {
             String selectSQLSoldTable = "SELECT * FROM " + SOLD_TABLE_NAME;
             ResultSet rs = statement.executeQuery(selectSQLSoldTable);
             while (rs.next()){
-                String cName = rs.getString(SOLD_CON_NAME_COL);
+                int cID = rs.getInt(SOLD_CON_ID_COL);
                 double sPrice = rs.getDouble(SOLD_SOLD_PRICE_COL);
                 String Title = rs.getString(SOLD_TITLE_COL);
-                RecordObjectSold recordObjectSold = new RecordObjectSold(cName,sPrice,Title);
+                RecordObjectSold recordObjectSold = new RecordObjectSold(cID,sPrice,Title);
                 allSoldRecords.add(recordObjectSold);
             }
             return allSoldRecords;

@@ -2,7 +2,7 @@
  * Created by dilli on 4/29/2017.
  */
 public class RecordObjectSold {
-    String Consignor;
+    int ConsignorID;
     double SoldPrice;
     String title;
 
@@ -10,12 +10,12 @@ public class RecordObjectSold {
         return SoldPrice;
     }
 
-    public String getConsignor() {
-        return Consignor;
+    public int getConsignor() {
+        return ConsignorID;
     }
 
-    public void setConsignor(String consignor) {
-        Consignor = consignor;
+    public void setConsignor(int consignorID) {
+        ConsignorID = consignorID;
     }
 
     public void setSoldPrice(double soldPrice) {
@@ -30,14 +30,14 @@ public class RecordObjectSold {
         this.title = title;
     }
 
-    RecordObjectSold(String cName, double sPrice, String t) {
-        Consignor = cName;
+    RecordObjectSold(int CID, double sPrice, String t) {
+        ConsignorID = CID;
         SoldPrice = sPrice;
         title = t;
 
     }
     @Override
     public String toString(){
-        return "Consignor: "+ this.Consignor+ "Title: "+ this.title + "Sold Price: "+this.SoldPrice;
+        return "Consignor: "+ this.ConsignorID+ "  Title: "+ this.title + "  Sold Price: "+this.SoldPrice;
     }
 }
