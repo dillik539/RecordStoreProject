@@ -10,20 +10,17 @@ public class RecordDB {
     private static final String DB_CONNECTION_URL = "jdbc:mysql://localhost:3306/RecordStore";     //Connection to the database
     private static final String USER = "khatiwoda";   //MYSQL username
     private static final String PASSWORD = "Saanvi";   //MYSQL password
-    private static final String TABLE_NAME = "Inventory"; //table name
-    private static final String PK_COLUMN = "ID";
-    private static final String CONSIGNOR_NAME_COLUMN = "ConsignorName";//column name
-    private static final String PHONE_NO_COLUMN = "PhoneNo";//column name
-    private static final String ARTIST_NAME_COLUMN = "ArtistName";
-    private static final String TITLE_COLUMN = "Title";
-    private static final String PRICE_COLUMN = "Price";
-    private static final String DATE_COLUMN = "RecordDate";
+    private static final String TABLE_NAME = "Inventory",PK_COLUMN = "ID",CONSIGNOR_NAME_COLUMN = "ConsignorName",PHONE_NO_COLUMN = "PhoneNo",
+    ARTIST_NAME_COLUMN = "ArtistName",TITLE_COLUMN = "Title",PRICE_COLUMN = "Price",DATE_COLUMN = "RecordDate";
 
-    private static final String SOLD_TABLE_NAME = "SoldItem";
-    private static final String SOLD_PK_COL = "SoldID";
-    private static final String SOLD_CON_ID_COL = "ConsignorID";
-    private static final String SOLD_SOLD_PRICE_COL = "SoldPrice";
-    private static final String SOLD_TITLE_COL = "Title";
+    private static final String SOLD_TABLE_NAME = "SoldItem",SOLD_PK_COL = "SoldID",SOLD_CON_ID_COL = "ConsignorID",
+            SOLD_SOLD_PRICE_COL = "SoldPrice",SOLD_TITLE_COL = "Title";
+
+    private static final String PAYEE_TABLE_NAME = "PayInfo",PAYEE_CON_NAME_COL = "Consignor",PAYEE_SHARE_COL = "ShareAmount",
+    PAYEE_AMOUNT_PAID_COL = "AmountPaid",PAYEE_BALANCE_DUE_COL = "BalanceDue";
+
+    private static final String BARGAIN_TABLE_NAME = "BargainList",BARGAIN_CON_COL = "ConsignorName",BARGAIN_ARTIST_NAME_COL = "ArtistName",
+    BARGAIN_TITLE_COL = "Title";
     //constructor
     RecordDB() {
         try {
@@ -49,9 +46,13 @@ public class RecordDB {
             + SOLD_CON_ID_COL + " INT," + SOLD_SOLD_PRICE_COL + " DOUBLE," + SOLD_TITLE_COL +" VARCHAR(50), PRIMARY KEY(" + SOLD_PK_COL + "))";
             statement.executeUpdate(createSoldItemTableSQL);
 
-//            String createPayInfoSQLTable = "CREATE TABLE IF NOT EXISTS PayInfo(Consignor VARCHAR(50) NOT NULL, AmountPaid DOUBLE NOT NULL," +
-//                    "BalanceDue DOUBLE NOT NULL)";
-//            statement.executeUpdate(createPayInfoSQLTable);
+           String createPayInfoSQLTable = "CREATE TABLE IF NOT EXISTS " + PAYEE_TABLE_NAME + "(" + PAYEE_CON_NAME_COL + " VARCHAR(50) NOT NULL," +
+                   PAYEE_SHARE_COL + " DOUBLE NOT NULL," + PAYEE_AMOUNT_PAID_COL + " DOUBLE NOT NULL," + PAYEE_BALANCE_DUE_COL + " DOUBLE NOT NULL)";
+           statement.executeUpdate(createPayInfoSQLTable);
+
+           String createBargainListSQLTable = "CREATE TABLE IF NOT EXISTS " + BARGAIN_TABLE_NAME + "(" + BARGAIN_CON_COL + " VARCHAR(50) NOT NULL," +
+                   BARGAIN_ARTIST_NAME_COL + " VARCHAR(50) NOT NULL," + BARGAIN_TITLE_COL + " VARCHAR(50) NOT NULL)";
+           statement.executeUpdate(createBargainListSQLTable);
 
             statement.close();
             connection.close();
@@ -91,6 +92,18 @@ public class RecordDB {
             connection.close();
         }catch (SQLException sql){
             sql.printStackTrace();
+        }
+    }
+    void addRecordToPayInfoItemTable(PayInfoObject payInfoObject){
+        try (Connection connection = DriverManager.getConnection(DB_CONNECTION_URL,USER,PASSWORD)){
+            Statement statement = connection.createStatement();
+            String addSQLDataToPayInfoTable = "INSERT INTO " + PAYEE_TABLE_NAME + "(" + PAYEE_CON_NAME_COL + "," + PAYEE_SHARE_COL + "," + PAYEE_AMOUNT_PAID_COL + "," + PAYEE_BALANCE_DUE_COL + ")" + " VALUES ('" +
+                    payInfoObject.payee + "','" + payInfoObject.shareAmount + "','" + payInfoObject.amountPaid + "','" +payInfoObject.amountOwed + "')";
+            statement.executeUpdate(addSQLDataToPayInfoTable);
+            statement.close();
+            connection.close();
+        }catch (SQLException sqle){
+            sqle.printStackTrace();
         }
     }
    // defines method that deletes data from the database
@@ -155,7 +168,7 @@ public class RecordDB {
         }
     }
     ArrayList<RecordObjectSold> fetchAllSoldRecords(){
-        ArrayList<RecordObjectSold> allSoldRecords = new ArrayList<>();
+        ArrayList<RecordObjectSold> allSoldRecords = new ArrayList();
         try(Connection connection = DriverManager.getConnection(DB_CONNECTION_URL,USER,PASSWORD);
         Statement statement = connection.createStatement()){
             String selectSQLSoldTable = "SELECT * FROM " + SOLD_TABLE_NAME;
@@ -165,11 +178,36 @@ public class RecordDB {
                 double sPrice = rs.getDouble(SOLD_SOLD_PRICE_COL);
                 String Title = rs.getString(SOLD_TITLE_COL);
                 RecordObjectSold recordObjectSold = new RecordObjectSold(cID,sPrice,Title);
-                allSoldRecords.add(recordObjectSold);
-            }
+                allSoldRecords.add(recordObjectSold);}
+            rs.close();
+            statement.close();
+            connection.close();
             return allSoldRecords;
         }catch (SQLException sql){
             sql.printStackTrace();
+            return null;
+        }
+    }
+    ArrayList<PayInfoObject> fetchAllPayInfoRecords(){
+        ArrayList<PayInfoObject> allPayeeRecords = new ArrayList<>();
+        try(Connection connection = DriverManager.getConnection(DB_CONNECTION_URL,USER,PASSWORD);
+        Statement statement = connection.createStatement()){
+            String selectSQLPayInfoTable = "SELECT * FROM PayInfo";
+            ResultSet rs = statement.executeQuery(selectSQLPayInfoTable);
+            while (rs.next()){
+                String payeeName = rs.getString(PAYEE_CON_NAME_COL);
+                double share = rs.getDouble(PAYEE_SHARE_COL);
+                double amountPaid = rs.getDouble(PAYEE_AMOUNT_PAID_COL);
+                double amountOwed = rs.getDouble(PAYEE_BALANCE_DUE_COL);
+                PayInfoObject payInfoObject = new PayInfoObject(payeeName,share,amountPaid,amountOwed);
+                allPayeeRecords.add(payInfoObject);
+            }
+            rs.close();
+            statement.close();
+            connection.close();
+            return allPayeeRecords;
+        }catch (SQLException sqle){
+            sqle.printStackTrace();
             return null;
         }
     }

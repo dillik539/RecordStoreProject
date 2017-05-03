@@ -31,6 +31,9 @@ public class RecordDBcontroller {
     ArrayList<RecordObjectSold> getAllSoldData(){
         return recordDB.fetchAllSoldRecords();
     }
+    ArrayList<PayInfoObject> getAllPayInfoData(){
+        return recordDB.fetchAllPayInfoRecords();
+    }
 
     void addRecordToDatabase(RecordObject recordObject) {
         recordDB.addRecord(recordObject);
@@ -38,5 +41,9 @@ public class RecordDBcontroller {
     void addRecordToSoldTable(RecordObjectSold recordObjectSold){
         recordDB.addRecordToSoldItemTable(recordObjectSold);
     }
+    void addRecordToPayInfoTable(PayInfoObject payInfoObject){
+        recordDB.addRecordToPayInfoItemTable(payInfoObject);
+    }
+
 
 }

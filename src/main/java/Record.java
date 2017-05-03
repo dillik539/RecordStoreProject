@@ -24,13 +24,14 @@ public class Record extends JFrame{
     private JButton deleteRecordButton;
     private JList<RecordObject> InventoryJList;
     private JList<RecordObjectSold> SoldItemJList;
-    private JList<RecordObject> DonatedItemJList;
-    private JList<RecordObject> PayInfoJList;
+    private JList<RecordObject> BargainJList;
+    private JList<PayInfoObject> PayInfoJList;
     private JLabel DisplayDaysJLabel;
     private JButton displayNoOfDaysButton;
     private JLabel NotifyConsignorLabel;
     private DefaultListModel<RecordObject> InventoryListModel;
     private DefaultListModel<RecordObjectSold> SoldItemListModel;
+    private DefaultListModel<PayInfoObject> PayInfoListModel;
     private RecordDBcontroller recordDBcontroller;
 
     Record(RecordDBcontroller recordDBcontroller){
@@ -38,8 +39,10 @@ public class Record extends JFrame{
         this.recordDBcontroller = recordDBcontroller;
         InventoryListModel = new DefaultListModel<RecordObject>();
         SoldItemListModel = new DefaultListModel<RecordObjectSold>();
+        PayInfoListModel = new DefaultListModel<PayInfoObject>();
         InventoryJList.setModel(InventoryListModel);
         SoldItemJList.setModel(SoldItemListModel);
+        PayInfoJList.setModel(PayInfoListModel);
         setContentPane(rootPanel);
         addItemsToComboBox();
         pack();
@@ -115,6 +118,7 @@ public class Record extends JFrame{
                 if (AddToComboBox.getSelectedItem().equals("Sold Item") && InventoryJList.getSelectedValue()!=null){
                     String sPriceString = JOptionPane.showInputDialog(Record.this,"Please enter the selling price");
                     double sPrice = Double.parseDouble(sPriceString);
+                    double consignorShare = sPrice*0.4;
                     RecordObject recordSold = InventoryJList.getSelectedValue();
                     String sTitle = recordSold.getTitle();
                     int sID = recordSold.getID();
@@ -123,6 +127,11 @@ public class Record extends JFrame{
                     recordDBcontroller.addRecordToSoldTable(recordObjectSold);
                     recordDBcontroller.delete(recordSold);//deletes selected object from Inventory list after it is added to sold item list.
                     JOptionPane.showMessageDialog(Record.this,"The selected item has been moved to sold item list");
+                    String payNowString = JOptionPane.showInputDialog(Record.this,"Please enter the amount you want to pay now to the consignor");
+                    double payNow  = Double.parseDouble(payNowString);
+                    double amountOwed = consignorShare - payNow;
+                    PayInfoObject payInfoObject = new PayInfoObject(consignorName,consignorShare,payNow,amountOwed);
+                    recordDBcontroller.addRecordToPayInfoTable(payInfoObject);
                     //RecordObject ro = InventoryJList.getSelectedValue();
                     //SoldItemListModel.addElement(recordObjectSold);
 
@@ -144,6 +153,17 @@ public class Record extends JFrame{
                 if(DisplayComboBox.getSelectedItem().equals("Sold Items")){
                     ArrayList<RecordObjectSold> allSoldData = recordDBcontroller.getAllSoldData();
                     setListOfSoldData(allSoldData);
+                }
+                if(DisplayComboBox.getSelectedItem().equals("Pay Information")){
+                    ArrayList<PayInfoObject> allPayInfoData = recordDBcontroller.getAllPayInfoData();
+                    setListOfPayInfoData(allPayInfoData);
+                }
+                if(DisplayComboBox.getSelectedItem().equals("No. of days in Inventory List")){
+                    if(InventoryJList.getSelectedValue()!=null) {
+                        displayNumberOfDays();
+                    }else {
+                        JOptionPane.showMessageDialog(Record.this,"Please select an item from the Inventory list to display number of days");
+                    }
                 }
             }
         });
@@ -208,6 +228,11 @@ public class Record extends JFrame{
         //SoldItemListModel.clear();
         for(RecordObjectSold robs : soldData){
             SoldItemListModel.addElement(robs);
+        }
+    }
+    void setListOfPayInfoData(ArrayList<PayInfoObject> payInfoData){
+        for(PayInfoObject pob : payInfoData){
+            PayInfoListModel.addElement(pob);
         }
     }
 }
