@@ -24,7 +24,7 @@ public class Record extends JFrame{
     private JButton deleteRecordButton;
     private JList<RecordObject> InventoryJList;
     private JList<RecordObjectSold> SoldItemJList;
-    private JList<RecordObject> BargainJList;
+    private JList<BargainListObject> BargainJList;
     private JList<PayInfoObject> PayInfoJList;
     private JLabel DisplayDaysJLabel;
     private JButton displayNoOfDaysButton;
@@ -32,6 +32,7 @@ public class Record extends JFrame{
     private DefaultListModel<RecordObject> InventoryListModel;
     private DefaultListModel<RecordObjectSold> SoldItemListModel;
     private DefaultListModel<PayInfoObject> PayInfoListModel;
+    private DefaultListModel<BargainListObject> BargainListModel;
     private RecordDBcontroller recordDBcontroller;
 
     Record(RecordDBcontroller recordDBcontroller){
@@ -40,9 +41,11 @@ public class Record extends JFrame{
         InventoryListModel = new DefaultListModel<RecordObject>();
         SoldItemListModel = new DefaultListModel<RecordObjectSold>();
         PayInfoListModel = new DefaultListModel<PayInfoObject>();
+        BargainListModel = new DefaultListModel<BargainListObject>();
         InventoryJList.setModel(InventoryListModel);
         SoldItemJList.setModel(SoldItemListModel);
         PayInfoJList.setModel(PayInfoListModel);
+        BargainJList.setModel(BargainListModel);
         setContentPane(rootPanel);
         addItemsToComboBox();
         pack();
@@ -60,7 +63,7 @@ public class Record extends JFrame{
         DisplayComboBox.addItem("All Inventory Records");
         DisplayComboBox.addItem("Sold Items");
         DisplayComboBox.addItem("Pay Information");
-        DisplayComboBox.addItem("Donated Item");
+        DisplayComboBox.addItem("Bargain List Item");
         DisplayComboBox.addItem("No. of days in Inventory List");
 
         ReturnComboBox.addItem("Yes");
@@ -136,6 +139,27 @@ public class Record extends JFrame{
                     //SoldItemListModel.addElement(recordObjectSold);
 
                 }
+                if(AddToComboBox.getSelectedItem().equals("Bargain List")){
+                    java.sql.Date recordAddedDate = InventoryJList.getSelectedValue().getDate();
+                    Date now = new Date();
+                    long date = now.getTime() - recordAddedDate.getTime();
+                    long msInDay = 1000*60*60*24;
+                    long days = date/msInDay;
+                    String StringDays = Long.toString(days);
+                    int intDays = Integer.parseInt(StringDays);
+                    System.out.println(intDays);
+
+//                    if(intDays<=7) {
+//                        JOptionPane.showMessageDialog(Record.this, "Oops! can't add this item to Bargain list before 30 days\n" +
+//                                "of it's stay in Inventory");
+//                    }else{
+                        String conName = InventoryJList.getSelectedValue().getConsignorName();
+                        String artistName = InventoryJList.getSelectedValue().getArtistName();
+                        String rTitle = InventoryJList.getSelectedValue().getTitle();
+                        BargainListObject bargainListObject = new BargainListObject(conName,artistName,rTitle);
+                        recordDBcontroller.addRecordToBargainTable(bargainListObject);
+                   // }
+                }
 //                else{
 //                    JOptionPane.showMessageDialog(Record.this,"Oops! missing correct selection");
 //                }
@@ -164,6 +188,10 @@ public class Record extends JFrame{
                     }else {
                         JOptionPane.showMessageDialog(Record.this,"Please select an item from the Inventory list to display number of days");
                     }
+                }
+                if(DisplayComboBox.getSelectedItem().equals("Bargain List Item")){
+                    ArrayList<BargainListObject> allBargainListData = recordDBcontroller.getAllBargainListData();
+                    setListOfBargainListData(allBargainListData);
                 }
             }
         });
@@ -233,6 +261,11 @@ public class Record extends JFrame{
     void setListOfPayInfoData(ArrayList<PayInfoObject> payInfoData){
         for(PayInfoObject pob : payInfoData){
             PayInfoListModel.addElement(pob);
+        }
+    }
+    void setListOfBargainListData(ArrayList<BargainListObject> bargainListData){
+        for(BargainListObject bob: bargainListData){
+            BargainListModel.addElement(bob);
         }
     }
 }

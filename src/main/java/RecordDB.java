@@ -106,6 +106,18 @@ public class RecordDB {
             sqle.printStackTrace();
         }
     }
+    void addRecordToBargainListTable(BargainListObject bargainListObject){
+        try(Connection connection = DriverManager.getConnection(DB_CONNECTION_URL,USER,PASSWORD);
+        Statement statement = connection.createStatement()){
+            String addSQLDataToBargainListTable = "INSERT INTO " + BARGAIN_TABLE_NAME + "(" + BARGAIN_CON_COL + "," + BARGAIN_ARTIST_NAME_COL + "," +
+                    BARGAIN_TITLE_COL + ") VALUES ('" + bargainListObject.Consignor + "','" + bargainListObject.Artist + "','"+ bargainListObject.Title +"')";
+            statement.executeUpdate(addSQLDataToBargainListTable);
+            statement.close();
+            connection.close();
+        }catch (SQLException SQL){
+            SQL.printStackTrace();
+        }
+    }
    // defines method that deletes data from the database
     void delete(RecordObject recordObject){
         try(Connection connection = DriverManager.getConnection(DB_CONNECTION_URL, USER, PASSWORD)){
@@ -192,7 +204,7 @@ public class RecordDB {
         ArrayList<PayInfoObject> allPayeeRecords = new ArrayList<>();
         try(Connection connection = DriverManager.getConnection(DB_CONNECTION_URL,USER,PASSWORD);
         Statement statement = connection.createStatement()){
-            String selectSQLPayInfoTable = "SELECT * FROM PayInfo";
+            String selectSQLPayInfoTable = "SELECT * FROM "+ PAYEE_TABLE_NAME;
             ResultSet rs = statement.executeQuery(selectSQLPayInfoTable);
             while (rs.next()){
                 String payeeName = rs.getString(PAYEE_CON_NAME_COL);
@@ -210,5 +222,28 @@ public class RecordDB {
             sqle.printStackTrace();
             return null;
         }
+    }
+    ArrayList<BargainListObject> fetchAllBargainListRecords(){
+        ArrayList<BargainListObject> allBargainListRecords = new ArrayList<>();
+        try(Connection connection= DriverManager.getConnection(DB_CONNECTION_URL,USER,PASSWORD);
+        Statement statement = connection.createStatement()){
+            String selectSQLBargainListTable = "SELECT * FROM " + BARGAIN_TABLE_NAME;
+            ResultSet rs = statement.executeQuery(selectSQLBargainListTable);
+            while (rs.next()){
+                String consignorName = rs.getString(BARGAIN_CON_COL);
+                String artistName = rs.getString(BARGAIN_ARTIST_NAME_COL);
+                String title = rs.getString(BARGAIN_TITLE_COL);
+                BargainListObject bargainListObject = new BargainListObject(consignorName,artistName,title);
+                allBargainListRecords.add(bargainListObject);
+            }
+            rs.close();
+            statement.close();
+            connection.close();
+            return allBargainListRecords;
+        }catch (SQLException SQLE){
+            SQLE.printStackTrace();
+            return null;
+        }
+
     }
 }

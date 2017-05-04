@@ -34,6 +34,9 @@ public class RecordDBcontroller {
     ArrayList<PayInfoObject> getAllPayInfoData(){
         return recordDB.fetchAllPayInfoRecords();
     }
+    ArrayList<BargainListObject> getAllBargainListData(){
+        return recordDB.fetchAllBargainListRecords();
+    }
 
     void addRecordToDatabase(RecordObject recordObject) {
         recordDB.addRecord(recordObject);
@@ -43,6 +46,9 @@ public class RecordDBcontroller {
     }
     void addRecordToPayInfoTable(PayInfoObject payInfoObject){
         recordDB.addRecordToPayInfoItemTable(payInfoObject);
+    }
+   void addRecordToBargainTable(BargainListObject bargainListObject){
+        recordDB.addRecordToBargainListTable(bargainListObject);
     }
 
 
