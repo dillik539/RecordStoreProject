@@ -79,6 +79,6 @@ public class RecordObject {
     }
     @Override
     public String toString(){
-        return "Consignor: "+consignorName + "   Phone: "+phone + "   Artist: "+artistName + "   Title: "+title + "   Price: "+price;
+        return "Consignor: " + consignorName + "   Phone: " + phone + "   Artist: "+ artistName + "   Title: " + title + "   Price: "+price;
     }
 }

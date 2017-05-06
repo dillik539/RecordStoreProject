@@ -1,5 +1,4 @@
 
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
@@ -77,7 +76,7 @@ public class Record extends JFrame{
                 //Read data, send message to database via controller
                 String cName = ConsignorNameTextField.getText();
                 String phone = PhoneNoTextField.getText();
-               String aName = ArtistNameTextField.getText();
+                String aName = ArtistNameTextField.getText();
                 String title = TitleTextField.getText();
                 java.util.Date recordDate = new java.util.Date();
                 java.sql.Date sqlrecordDate = new java.sql.Date(recordDate.getTime());
@@ -123,17 +122,18 @@ public class Record extends JFrame{
                     double sPrice = Double.parseDouble(sPriceString);
                     double consignorShare = sPrice*0.4;
                     RecordObject recordSold = InventoryJList.getSelectedValue();
+                    String conName = recordSold.getConsignorName();
                     String sTitle = recordSold.getTitle();
-                    int sID = recordSold.getID();
-                    String consignorName = recordSold.getConsignorName();
-                    RecordObjectSold recordObjectSold = new RecordObjectSold(sID,sPrice,sTitle);
+                    Date soldDate = new Date();
+                    java.sql.Date soldDateSQL = new java.sql.Date(soldDate.getTime());
+                    RecordObjectSold recordObjectSold = new RecordObjectSold(conName,sTitle,sPrice,soldDateSQL);
                     recordDBcontroller.addRecordToSoldTable(recordObjectSold);
                     recordDBcontroller.delete(recordSold);//deletes selected object from Inventory list after it is added to sold item list.
                     JOptionPane.showMessageDialog(Record.this,"The selected item has been moved to sold item list");
                     String payNowString = JOptionPane.showInputDialog(Record.this,"Please enter the amount you want to pay now to the consignor");
                     double payNow  = Double.parseDouble(payNowString);
                     double amountOwed = consignorShare - payNow;
-                    PayInfoObject payInfoObject = new PayInfoObject(consignorName,consignorShare,payNow,amountOwed);
+                    PayInfoObject payInfoObject = new PayInfoObject(conName,consignorShare,payNow,amountOwed);
                     recordDBcontroller.addRecordToPayInfoTable(payInfoObject);
                     //RecordObject ro = InventoryJList.getSelectedValue();
                     //SoldItemListModel.addElement(recordObjectSold);
@@ -147,18 +147,19 @@ public class Record extends JFrame{
                     long days = date/msInDay;
                     String StringDays = Long.toString(days);
                     int intDays = Integer.parseInt(StringDays);
-                    System.out.println(intDays);
+                    int maxDaysInInventory = 30;
 
-//                    if(intDays<=7) {
-//                        JOptionPane.showMessageDialog(Record.this, "Oops! can't add this item to Bargain list before 30 days\n" +
-//                                "of it's stay in Inventory");
-//                    }else{
-                        String conName = InventoryJList.getSelectedValue().getConsignorName();
-                        String artistName = InventoryJList.getSelectedValue().getArtistName();
-                        String rTitle = InventoryJList.getSelectedValue().getTitle();
-                        BargainListObject bargainListObject = new BargainListObject(conName,artistName,rTitle);
-                        recordDBcontroller.addRecordToBargainTable(bargainListObject);
-                   // }
+                    if(intDays<=maxDaysInInventory) {
+                        JOptionPane.showMessageDialog(Record.this, "Oops! can't add this item to Bargain list before 30 days\n" +
+                                "of it's stay in Inventory");
+                    }else{
+                    String conName = InventoryJList.getSelectedValue().getConsignorName();
+                    String artistName = InventoryJList.getSelectedValue().getArtistName();
+                    String rTitle = InventoryJList.getSelectedValue().getTitle();
+                    double basePrice = 1;
+                    BargainListObject bargainListObject = new BargainListObject(conName,rTitle, artistName,basePrice);
+                    recordDBcontroller.addRecordToBargainTable(bargainListObject);
+                     }
                 }
 //                else{
 //                    JOptionPane.showMessageDialog(Record.this,"Oops! missing correct selection");
@@ -253,17 +254,19 @@ public class Record extends JFrame{
         }
     }
     void setListOfSoldData(ArrayList<RecordObjectSold> soldData){
-        //SoldItemListModel.clear();
+        SoldItemListModel.clear();
         for(RecordObjectSold robs : soldData){
             SoldItemListModel.addElement(robs);
         }
     }
     void setListOfPayInfoData(ArrayList<PayInfoObject> payInfoData){
+        PayInfoListModel.clear();
         for(PayInfoObject pob : payInfoData){
             PayInfoListModel.addElement(pob);
         }
     }
     void setListOfBargainListData(ArrayList<BargainListObject> bargainListData){
+        BargainListModel.clear();
         for(BargainListObject bob: bargainListData){
             BargainListModel.addElement(bob);
         }

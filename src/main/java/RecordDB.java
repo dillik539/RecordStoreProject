@@ -11,16 +11,16 @@ public class RecordDB {
     private static final String USER = "khatiwoda";   //MYSQL username
     private static final String PASSWORD = "Saanvi";   //MYSQL password
     private static final String TABLE_NAME = "Inventory",PK_COLUMN = "ID",CONSIGNOR_NAME_COLUMN = "ConsignorName",PHONE_NO_COLUMN = "PhoneNo",
-    ARTIST_NAME_COLUMN = "ArtistName",TITLE_COLUMN = "Title",PRICE_COLUMN = "Price",DATE_COLUMN = "RecordDate";
+            ARTIST_NAME_COLUMN = "ArtistName",TITLE_COLUMN = "Title",PRICE_COLUMN = "Price",DATE_COLUMN = "RecordDate";
 
-    private static final String SOLD_TABLE_NAME = "SoldItem",SOLD_PK_COL = "SoldID",SOLD_CON_ID_COL = "ConsignorID",
-            SOLD_SOLD_PRICE_COL = "SoldPrice",SOLD_TITLE_COL = "Title";
+    private static final String SOLD_TABLE_NAME = "SoldItem",SOLD_PK_COL = "SoldID",SOLD_CON_COL = "ConsignorName",
+            SOLD_TITLE_COL = "Title",SOLD_SOLD_PRICE_COL = "SoldPrice", SOLD_DATE_COL = "DateSold";
 
     private static final String PAYEE_TABLE_NAME = "PayInfo",PAYEE_CON_NAME_COL = "Consignor",PAYEE_SHARE_COL = "ShareAmount",
-    PAYEE_AMOUNT_PAID_COL = "AmountPaid",PAYEE_BALANCE_DUE_COL = "BalanceDue";
+            PAYEE_AMOUNT_PAID_COL = "AmountPaid",PAYEE_BALANCE_DUE_COL = "BalanceDue";
 
-    private static final String BARGAIN_TABLE_NAME = "BargainList",BARGAIN_CON_COL = "ConsignorName",BARGAIN_ARTIST_NAME_COL = "ArtistName",
-    BARGAIN_TITLE_COL = "Title";
+    private static final String BARGAIN_TABLE_NAME = "BargainList",BARGAIN_CON_COL = "ConsignorName",BARGAIN_TITLE_COL = "Title",
+            BARGAIN_ARTIST_NAME_COL = "ArtistName", BARGAIN_BASE_PRICE_COL = "BasePrice";
     //constructor
     RecordDB() {
         try {
@@ -43,16 +43,17 @@ public class RecordDB {
             statement.executeUpdate(createInventoryTableSQL);
 
             String createSoldItemTableSQL = "CREATE TABLE IF NOT EXISTS " + SOLD_TABLE_NAME + "(" + SOLD_PK_COL + " INT NOT NULL AUTO_INCREMENT,"
-            + SOLD_CON_ID_COL + " INT," + SOLD_SOLD_PRICE_COL + " DOUBLE," + SOLD_TITLE_COL +" VARCHAR(50), PRIMARY KEY(" + SOLD_PK_COL + "))";
+                    + SOLD_CON_COL + " VARCHAR(20)," + SOLD_TITLE_COL +" VARCHAR(50)," + SOLD_SOLD_PRICE_COL + " DOUBLE," + SOLD_DATE_COL
+                    + " TIMESTAMP, PRIMARY KEY (" + SOLD_PK_COL + "))";
             statement.executeUpdate(createSoldItemTableSQL);
 
-           String createPayInfoSQLTable = "CREATE TABLE IF NOT EXISTS " + PAYEE_TABLE_NAME + "(" + PAYEE_CON_NAME_COL + " VARCHAR(50) NOT NULL," +
-                   PAYEE_SHARE_COL + " DOUBLE NOT NULL," + PAYEE_AMOUNT_PAID_COL + " DOUBLE NOT NULL," + PAYEE_BALANCE_DUE_COL + " DOUBLE NOT NULL)";
-           statement.executeUpdate(createPayInfoSQLTable);
+            String createPayInfoSQLTable = "CREATE TABLE IF NOT EXISTS " + PAYEE_TABLE_NAME + "(" + PAYEE_CON_NAME_COL + " VARCHAR(50) NOT NULL," +
+                    PAYEE_SHARE_COL + " DOUBLE NOT NULL," + PAYEE_AMOUNT_PAID_COL + " DOUBLE NOT NULL," + PAYEE_BALANCE_DUE_COL + " DOUBLE NOT NULL)";
+            statement.executeUpdate(createPayInfoSQLTable);
 
-           String createBargainListSQLTable = "CREATE TABLE IF NOT EXISTS " + BARGAIN_TABLE_NAME + "(" + BARGAIN_CON_COL + " VARCHAR(50) NOT NULL," +
-                   BARGAIN_ARTIST_NAME_COL + " VARCHAR(50) NOT NULL," + BARGAIN_TITLE_COL + " VARCHAR(50) NOT NULL)";
-           statement.executeUpdate(createBargainListSQLTable);
+            String createBargainListSQLTable = "CREATE TABLE IF NOT EXISTS " + BARGAIN_TABLE_NAME + "(" + BARGAIN_CON_COL + " VARCHAR(50) NOT NULL," +
+                     BARGAIN_TITLE_COL + " VARCHAR(50) NOT NULL," + BARGAIN_ARTIST_NAME_COL + " VARCHAR(20) NOT NULL," + BARGAIN_BASE_PRICE_COL + " DOUBLE NOT NULL)";
+            statement.executeUpdate(createBargainListSQLTable);
 
             statement.close();
             connection.close();
@@ -85,8 +86,9 @@ public class RecordDB {
     void addRecordToSoldItemTable(RecordObjectSold recordObjectSold){
         try (Connection connection = DriverManager.getConnection(DB_CONNECTION_URL,USER,PASSWORD)){
             Statement statement = connection.createStatement();
-            String addSQLDataToSoldTable = "INSERT INTO " + SOLD_TABLE_NAME + "(" + SOLD_CON_ID_COL + ","+ SOLD_SOLD_PRICE_COL+ ","+ SOLD_TITLE_COL+")" + " VALUES ('"+recordObjectSold.ConsignorID + "','"
-                    + recordObjectSold.SoldPrice +"','"+recordObjectSold.title+ "')";
+            String addSQLDataToSoldTable = "INSERT INTO " + SOLD_TABLE_NAME + "(" + SOLD_CON_COL + ","+
+                    SOLD_TITLE_COL+","+ SOLD_SOLD_PRICE_COL+"," + SOLD_DATE_COL + ")" + " VALUES ('"+recordObjectSold.Consignor + "','"
+                    + recordObjectSold.title +"','"+recordObjectSold.SoldPrice+ "','"+ recordObjectSold.dateSold +"')";
             statement.executeUpdate(addSQLDataToSoldTable);
             statement.close();
             connection.close();
@@ -108,9 +110,10 @@ public class RecordDB {
     }
     void addRecordToBargainListTable(BargainListObject bargainListObject){
         try(Connection connection = DriverManager.getConnection(DB_CONNECTION_URL,USER,PASSWORD);
-        Statement statement = connection.createStatement()){
-            String addSQLDataToBargainListTable = "INSERT INTO " + BARGAIN_TABLE_NAME + "(" + BARGAIN_CON_COL + "," + BARGAIN_ARTIST_NAME_COL + "," +
-                    BARGAIN_TITLE_COL + ") VALUES ('" + bargainListObject.Consignor + "','" + bargainListObject.Artist + "','"+ bargainListObject.Title +"')";
+            Statement statement = connection.createStatement()){
+            String addSQLDataToBargainListTable = "INSERT INTO " + BARGAIN_TABLE_NAME + "(" + BARGAIN_CON_COL + "," +
+                    BARGAIN_TITLE_COL + "," + BARGAIN_ARTIST_NAME_COL + "," + BARGAIN_BASE_PRICE_COL + ") VALUES ('" + bargainListObject.Consignor
+                    + "','" + bargainListObject.Title + "','"+ bargainListObject.Artist +"','" + bargainListObject.basePrice + "')";
             statement.executeUpdate(addSQLDataToBargainListTable);
             statement.close();
             connection.close();
@@ -118,7 +121,7 @@ public class RecordDB {
             SQL.printStackTrace();
         }
     }
-   // defines method that deletes data from the database
+    // defines method that deletes data from the database
     void delete(RecordObject recordObject){
         try(Connection connection = DriverManager.getConnection(DB_CONNECTION_URL, USER, PASSWORD)){
             Statement statement = connection.createStatement();
@@ -182,14 +185,15 @@ public class RecordDB {
     ArrayList<RecordObjectSold> fetchAllSoldRecords(){
         ArrayList<RecordObjectSold> allSoldRecords = new ArrayList();
         try(Connection connection = DriverManager.getConnection(DB_CONNECTION_URL,USER,PASSWORD);
-        Statement statement = connection.createStatement()){
+            Statement statement = connection.createStatement()){
             String selectSQLSoldTable = "SELECT * FROM " + SOLD_TABLE_NAME;
             ResultSet rs = statement.executeQuery(selectSQLSoldTable);
             while (rs.next()){
-                int cID = rs.getInt(SOLD_CON_ID_COL);
+                String cName = rs.getString(SOLD_CON_COL);
                 double sPrice = rs.getDouble(SOLD_SOLD_PRICE_COL);
                 String Title = rs.getString(SOLD_TITLE_COL);
-                RecordObjectSold recordObjectSold = new RecordObjectSold(cID,sPrice,Title);
+                Date soldDate = rs.getDate(SOLD_DATE_COL);
+                RecordObjectSold recordObjectSold = new RecordObjectSold(cName,Title,sPrice,(java.sql.Date)soldDate);
                 allSoldRecords.add(recordObjectSold);}
             rs.close();
             statement.close();
@@ -203,7 +207,7 @@ public class RecordDB {
     ArrayList<PayInfoObject> fetchAllPayInfoRecords(){
         ArrayList<PayInfoObject> allPayeeRecords = new ArrayList<>();
         try(Connection connection = DriverManager.getConnection(DB_CONNECTION_URL,USER,PASSWORD);
-        Statement statement = connection.createStatement()){
+            Statement statement = connection.createStatement()){
             String selectSQLPayInfoTable = "SELECT * FROM "+ PAYEE_TABLE_NAME;
             ResultSet rs = statement.executeQuery(selectSQLPayInfoTable);
             while (rs.next()){
@@ -226,14 +230,15 @@ public class RecordDB {
     ArrayList<BargainListObject> fetchAllBargainListRecords(){
         ArrayList<BargainListObject> allBargainListRecords = new ArrayList<>();
         try(Connection connection= DriverManager.getConnection(DB_CONNECTION_URL,USER,PASSWORD);
-        Statement statement = connection.createStatement()){
+            Statement statement = connection.createStatement()){
             String selectSQLBargainListTable = "SELECT * FROM " + BARGAIN_TABLE_NAME;
             ResultSet rs = statement.executeQuery(selectSQLBargainListTable);
             while (rs.next()){
                 String consignorName = rs.getString(BARGAIN_CON_COL);
                 String artistName = rs.getString(BARGAIN_ARTIST_NAME_COL);
                 String title = rs.getString(BARGAIN_TITLE_COL);
-                BargainListObject bargainListObject = new BargainListObject(consignorName,artistName,title);
+                double basePrice = rs.getDouble(BARGAIN_BASE_PRICE_COL);
+                BargainListObject bargainListObject = new BargainListObject(consignorName,title,artistName,basePrice);
                 allBargainListRecords.add(bargainListObject);
             }
             rs.close();

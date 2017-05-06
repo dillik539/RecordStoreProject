@@ -4,13 +4,22 @@
 public class BargainListObject {
     String Consignor;
     String Artist;
-
+    String Title;
+    double basePrice;
     public String getConsignor() {
         return Consignor;
     }
 
     public void setConsignor(String consignor) {
         Consignor = consignor;
+    }
+
+    public double getBasePrice() {
+        return basePrice;
+    }
+
+    public void setBasePrice(double basePrice) {
+        this.basePrice = basePrice;
     }
 
     public String getArtist() {
@@ -29,14 +38,16 @@ public class BargainListObject {
         Title = title;
     }
 
-    String Title;
-    BargainListObject(String Cname, String aName,String title){
+
+    BargainListObject(String Cname, String title, String aName, double bPrice){
         Consignor = Cname;
         Artist = aName;
         Title = title;
+        basePrice = bPrice;
+
     }
     @Override
     public String toString(){
-        return "Consignor: " + this.Consignor + "   Artist: " + this.Artist + "   Title: " + this.Title;
+        return "Consignor: " + this.Consignor + "   Title: " + this.Title + "   Artist: " + this.Artist + "   Base Price: " + this.basePrice;
     }
 }

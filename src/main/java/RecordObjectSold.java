@@ -1,21 +1,33 @@
+import java.sql.Date;
+
 /**
  * Created by dilli on 4/29/2017.
  */
 public class RecordObjectSold {
-    int ConsignorID;
+    String Consignor;
     double SoldPrice;
     String title;
+    java.sql.Date dateSold;
+
+    public Date getDateSold() {
+        return dateSold;
+    }
+
+    public void setDateSold(Date dateSold) {
+        this.dateSold = dateSold;
+    }
 
     public double getSoldPrice() {
+
         return SoldPrice;
     }
 
-    public int getConsignor() {
-        return ConsignorID;
+    public String getConsignor() {
+        return Consignor;
     }
 
-    public void setConsignor(int consignorID) {
-        ConsignorID = consignorID;
+    public void setConsignor(String consignor) {
+        Consignor = consignor;
     }
 
     public void setSoldPrice(double soldPrice) {
@@ -30,14 +42,16 @@ public class RecordObjectSold {
         this.title = title;
     }
 
-    RecordObjectSold(int CID, double sPrice, String t) {
-        ConsignorID = CID;
+    RecordObjectSold(String cName, String t, double sPrice, java.sql.Date dSold) {
+        Consignor = cName;
         SoldPrice = sPrice;
         title = t;
+        dateSold = dSold;
 
     }
     @Override
     public String toString(){
-        return "Consignor: "+ this.ConsignorID+ "  Title: "+ this.title + "  Sold Price: "+this.SoldPrice;
+        return "Consignor Name: "+ this.Consignor+   "  Sold Price: "
+                + this.SoldPrice + "  Title: "+ this.title + "   Sold on: " + this.dateSold;
     }
 }
