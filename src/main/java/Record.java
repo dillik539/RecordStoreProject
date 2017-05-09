@@ -10,27 +10,16 @@ this class prepares GUI and sets limits and validation on it.
  */
 public class Record extends JFrame{
     //defines GUI components
-    private JTextField ConsignorNameTextField;
-    private JTextField PriceTextField;
-    private JTextField TitleTextField;
-    private JTextField ArtistNameTextField;
-    private JTextField PhoneNoTextField;
-    private JComboBox AddToComboBox;
-    private JComboBox DisplayComboBox;
+    private JTextField ConsignorNameTextField,PriceTextField,TitleTextField,ArtistNameTextField,PhoneNoTextField;
+    private JComboBox AddToComboBox,DisplayComboBox,ReturnComboBox;
     private JPanel rootPanel;
-    private JButton addRecordButton;
-    private JButton showRecordButton;
-    private JComboBox ReturnComboBox;
-    private JButton deleteRecordButton;
+    private JButton addRecordButton,showRecordButton,deleteRecordButton,displayNoOfDaysButton;
     private JList<RecordObject> InventoryJList;
     private JList<RecordObjectSold> SoldItemJList;
     private JList<BargainListObject> BargainJList;
     private JList<PayInfoObject> PayInfoJList;
     private JList<DonatedItemObject> DonatedItemJList;
-    private JLabel DisplayDaysJLabel;
-    private JButton displayNoOfDaysButton;
-    private JLabel NotifyConsignorLabel;
-    private JLabel BargianListLabel;
+    private JLabel DisplayDaysJLabel,NotifyConsignorLabel,BargianListLabel;
     //defines ListModels
     private DefaultListModel<RecordObject> InventoryListModel;
     private DefaultListModel<RecordObjectSold> SoldItemListModel;
