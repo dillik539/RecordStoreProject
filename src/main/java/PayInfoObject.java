@@ -1,12 +1,14 @@
 /**
- * Created by dilli on 5/2/2017.
+ this class creates a pay info object
  */
 public class PayInfoObject {
-    String payee;
-    double shareAmount;
-    double amountPaid;
-    double amountOwed;
+    //variables
+    private String payee;
+    private double shareAmount;
+    private double amountPaid;
+    private double amountOwed;
 
+    //getters and setters
     public String getPayee() {
         return payee;
     }
@@ -38,13 +40,14 @@ public class PayInfoObject {
     public void setAmountOwed(double amountOwed) {
         this.amountOwed = amountOwed;
     }
-
+    //constructor
     PayInfoObject(String cPayee, double share, double paid, double owed){
         payee = cPayee;
         shareAmount = share;
         amountPaid = paid;
         amountOwed = owed;
     }
+    //a toString method
     @Override
     public String toString(){
        return "Consignor: " + this.payee + "   Share: " + this.shareAmount + "   Amount Paid: " + this.amountPaid + "   Amount Owed: " + this.amountOwed;

@@ -2,25 +2,30 @@ import java.sql.*;
 import java.util.*;
 import java.util.Date;
 
-/**
- * Created by dilli on 4/25/2017.
+/*
+This class creates database tables, and manages all database records, and all database queries
  */
 public class RecordDB {
     private static final String JDBC_DRIVER = "com.mysql.cj.jdbc.Driver";        //Configure the driver needed
     private static final String DB_CONNECTION_URL = "jdbc:mysql://localhost:3306/RecordStore";     //Connection to the database
     private static final String USER = "khatiwoda";   //MYSQL username
-    private static final String PASSWORD = "Saanvi";   //MYSQL password
+    private static final String PASSWORD = System.getenv("MYSQL_PW"); //MYSQL password
+    //defines table name and its columns
     private static final String TABLE_NAME = "Inventory",PK_COLUMN = "ID",CONSIGNOR_NAME_COLUMN = "ConsignorName",PHONE_NO_COLUMN = "PhoneNo",
             ARTIST_NAME_COLUMN = "ArtistName",TITLE_COLUMN = "Title",PRICE_COLUMN = "Price",DATE_COLUMN = "RecordDate";
-
+    //defines table name and its columns
     private static final String SOLD_TABLE_NAME = "SoldItem",SOLD_PK_COL = "SoldID",SOLD_CON_COL = "ConsignorName",
             SOLD_TITLE_COL = "Title",SOLD_SOLD_PRICE_COL = "SoldPrice", SOLD_DATE_COL = "DateSold";
-
+    //defines table name and its column
     private static final String PAYEE_TABLE_NAME = "PayInfo",PAYEE_CON_NAME_COL = "Consignor",PAYEE_SHARE_COL = "ShareAmount",
             PAYEE_AMOUNT_PAID_COL = "AmountPaid",PAYEE_BALANCE_DUE_COL = "BalanceDue";
-
+    //defines table name and its column
     private static final String BARGAIN_TABLE_NAME = "BargainList",BARGAIN_CON_COL = "ConsignorName",BARGAIN_TITLE_COL = "Title",
-            BARGAIN_ARTIST_NAME_COL = "ArtistName", BARGAIN_BASE_PRICE_COL = "BasePrice";
+            BARGAIN_ARTIST_NAME_COL = "ArtistName", BARGAIN_BASE_PRICE_COL = "BasePrice",BARGAIN_DATE_ADDED_COL = "DateAdded";
+    //defines table name and its column
+    private static final String DONATED_ITEM_TABLE_NAME = "DonatedItem", DONATED_ITEM_CON_COL = "ConsignorName", DONATED_ITEM_TITLE_COL =
+            "RecordTitle", DONATED_ITEM_ARTIST_COL = "ArtistName";
+
     //constructor
     RecordDB() {
         try {
@@ -31,7 +36,7 @@ public class RecordDB {
             System.exit(-1);  //quit the program
         }
     }
-    //defines method
+    //defines method that creates tables
     void createTable() {
 
         try (Connection connection = DriverManager.getConnection(DB_CONNECTION_URL, USER, PASSWORD);
@@ -52,8 +57,13 @@ public class RecordDB {
             statement.executeUpdate(createPayInfoSQLTable);
 
             String createBargainListSQLTable = "CREATE TABLE IF NOT EXISTS " + BARGAIN_TABLE_NAME + "(" + BARGAIN_CON_COL + " VARCHAR(50) NOT NULL," +
-                     BARGAIN_TITLE_COL + " VARCHAR(50) NOT NULL," + BARGAIN_ARTIST_NAME_COL + " VARCHAR(20) NOT NULL," + BARGAIN_BASE_PRICE_COL + " DOUBLE NOT NULL)";
+                     BARGAIN_TITLE_COL + " VARCHAR(50) NOT NULL," + BARGAIN_ARTIST_NAME_COL + " VARCHAR(20) NOT NULL," + BARGAIN_BASE_PRICE_COL +
+                    " DOUBLE NOT NULL," + BARGAIN_DATE_ADDED_COL + " TIMESTAMP)";
             statement.executeUpdate(createBargainListSQLTable);
+
+            String createDonatedItemSQLTable = "CREATE TABLE IF NOT EXISTS " + DONATED_ITEM_TABLE_NAME + "(" + DONATED_ITEM_CON_COL + " VARCHAR(50) NOT NULL," +
+                    DONATED_ITEM_TITLE_COL + " VARCHAR(50) NOT NULL," + DONATED_ITEM_ARTIST_COL + " VARCHAR(50) NOT NULL)";
+            statement.executeUpdate(createDonatedItemSQLTable);
 
             statement.close();
             connection.close();
@@ -67,28 +77,24 @@ public class RecordDB {
 
         try (Connection connection = DriverManager.getConnection(DB_CONNECTION_URL, USER, PASSWORD)) {
             Statement statement = connection.createStatement();
-            String addSQLrecordObject = "INSERT INTO " + TABLE_NAME + "(" + CONSIGNOR_NAME_COLUMN + ", "+ PHONE_NO_COLUMN + ", " + ARTIST_NAME_COLUMN + ", " + TITLE_COLUMN + ", " + PRICE_COLUMN + ", " + DATE_COLUMN + ")" + " VALUES ('" + recordObject.consignorName + "' , '"
-                    + recordObject.phone + "','" + recordObject.artistName + "','" + recordObject.title + "','"
-                    + recordObject.price +"','" + recordObject.date + "')" ;
-
+            String addSQLrecordObject = "INSERT INTO " + TABLE_NAME + "(" + CONSIGNOR_NAME_COLUMN + ", "+ PHONE_NO_COLUMN + ", "
+                    + ARTIST_NAME_COLUMN + ", " + TITLE_COLUMN + ", " + PRICE_COLUMN + ", " + DATE_COLUMN + ")" + " VALUES ('" + recordObject.getConsignorName() + "' , '"
+                    + recordObject.getPhone() + "','" + recordObject.getArtistName() + "','" + recordObject.getTitle() + "','"
+                    + recordObject.getPrice() +"','" + recordObject.getDate() + "')" ;
             statement.executeUpdate(addSQLrecordObject);
-
-            //TO DO add a message dialog box with "Added cube solver record for 'cubesolver name'" message.
-
             statement.close();
             connection.close();
-
         } catch (SQLException se) {
             se.printStackTrace();
         }
-
     }
+    //method that adds data to sold item table
     void addRecordToSoldItemTable(RecordObjectSold recordObjectSold){
         try (Connection connection = DriverManager.getConnection(DB_CONNECTION_URL,USER,PASSWORD)){
             Statement statement = connection.createStatement();
             String addSQLDataToSoldTable = "INSERT INTO " + SOLD_TABLE_NAME + "(" + SOLD_CON_COL + ","+
-                    SOLD_TITLE_COL+","+ SOLD_SOLD_PRICE_COL+"," + SOLD_DATE_COL + ")" + " VALUES ('"+recordObjectSold.Consignor + "','"
-                    + recordObjectSold.title +"','"+recordObjectSold.SoldPrice+ "','"+ recordObjectSold.dateSold +"')";
+                    SOLD_TITLE_COL+","+ SOLD_SOLD_PRICE_COL+"," + SOLD_DATE_COL + ")" + " VALUES ('"+recordObjectSold.getConsignor() + "','"
+                    + recordObjectSold.getTitle() +"','"+recordObjectSold.getSoldPrice()+ "','"+ recordObjectSold.getDateSold() +"')";
             statement.executeUpdate(addSQLDataToSoldTable);
             statement.close();
             connection.close();
@@ -96,11 +102,13 @@ public class RecordDB {
             sql.printStackTrace();
         }
     }
+    //methods that adds data to pay info table
     void addRecordToPayInfoItemTable(PayInfoObject payInfoObject){
         try (Connection connection = DriverManager.getConnection(DB_CONNECTION_URL,USER,PASSWORD)){
             Statement statement = connection.createStatement();
-            String addSQLDataToPayInfoTable = "INSERT INTO " + PAYEE_TABLE_NAME + "(" + PAYEE_CON_NAME_COL + "," + PAYEE_SHARE_COL + "," + PAYEE_AMOUNT_PAID_COL + "," + PAYEE_BALANCE_DUE_COL + ")" + " VALUES ('" +
-                    payInfoObject.payee + "','" + payInfoObject.shareAmount + "','" + payInfoObject.amountPaid + "','" +payInfoObject.amountOwed + "')";
+            String addSQLDataToPayInfoTable = "INSERT INTO " + PAYEE_TABLE_NAME + "(" + PAYEE_CON_NAME_COL + "," + PAYEE_SHARE_COL + ","
+                    + PAYEE_AMOUNT_PAID_COL + "," + PAYEE_BALANCE_DUE_COL + ")" + " VALUES ('" + payInfoObject.getPayee() + "','"
+                    + payInfoObject.getShareAmount() + "','" + payInfoObject.getAmountPaid() + "','" +payInfoObject.getAmountOwed() + "')";
             statement.executeUpdate(addSQLDataToPayInfoTable);
             statement.close();
             connection.close();
@@ -108,12 +116,14 @@ public class RecordDB {
             sqle.printStackTrace();
         }
     }
+    //methods that adds data to bargain list table
     void addRecordToBargainListTable(BargainListObject bargainListObject){
         try(Connection connection = DriverManager.getConnection(DB_CONNECTION_URL,USER,PASSWORD);
             Statement statement = connection.createStatement()){
             String addSQLDataToBargainListTable = "INSERT INTO " + BARGAIN_TABLE_NAME + "(" + BARGAIN_CON_COL + "," +
-                    BARGAIN_TITLE_COL + "," + BARGAIN_ARTIST_NAME_COL + "," + BARGAIN_BASE_PRICE_COL + ") VALUES ('" + bargainListObject.Consignor
-                    + "','" + bargainListObject.Title + "','"+ bargainListObject.Artist +"','" + bargainListObject.basePrice + "')";
+                    BARGAIN_TITLE_COL + "," + BARGAIN_ARTIST_NAME_COL + "," + BARGAIN_BASE_PRICE_COL + "," + BARGAIN_DATE_ADDED_COL + ")" +
+                    "VALUES ('" + bargainListObject.getConsignor() + "','" + bargainListObject.getTitle() + "','"+
+                    bargainListObject.getArtist() +"','" + bargainListObject.getBasePrice() + "','" + bargainListObject.getDateAddedToBargainList() + "')";
             statement.executeUpdate(addSQLDataToBargainListTable);
             statement.close();
             connection.close();
@@ -121,19 +131,34 @@ public class RecordDB {
             SQL.printStackTrace();
         }
     }
+    //method that adds data to donated item table
+    void addRecordToDonatedItemTable(DonatedItemObject donatedItemObject){
+        try(Connection connection = DriverManager.getConnection(DB_CONNECTION_URL,USER,PASSWORD);
+        Statement statement = connection.createStatement()){
+            String addSQLDataToDonatedItemTable = "INSERT INTO " + DONATED_ITEM_TABLE_NAME + "(" + DONATED_ITEM_CON_COL + "," +
+                    DONATED_ITEM_TITLE_COL + "," + DONATED_ITEM_ARTIST_COL + ") VALUES ('" + donatedItemObject.getConsignorName() +
+                    "','" + donatedItemObject.getRecordTitle() + "','" + donatedItemObject.getArtistName() + "')";
+            statement.executeUpdate(addSQLDataToDonatedItemTable);
+            statement.close();
+            connection.close();
+        }catch (SQLException SQLE){
+            SQLE.printStackTrace();
+        }
+    }
     // defines method that deletes data from the database
     void delete(RecordObject recordObject){
         try(Connection connection = DriverManager.getConnection(DB_CONNECTION_URL, USER, PASSWORD)){
             Statement statement = connection.createStatement();
             String deleteSQLrecordObject = "DELETE FROM %s WHERE %s = ? AND %s = ? AND %s = ? AND %s = ? AND %s = ? AND %s = ?";
-            String deleteSQLrecordObjectRecord = String.format(deleteSQLrecordObject,TABLE_NAME,CONSIGNOR_NAME_COLUMN,PHONE_NO_COLUMN,ARTIST_NAME_COLUMN,TITLE_COLUMN,PRICE_COLUMN,DATE_COLUMN);
+            String deleteSQLrecordObjectRecord = String.format(deleteSQLrecordObject,TABLE_NAME,CONSIGNOR_NAME_COLUMN,PHONE_NO_COLUMN,
+                    ARTIST_NAME_COLUMN,TITLE_COLUMN,PRICE_COLUMN,DATE_COLUMN);
             PreparedStatement deletePreparedStatement = connection.prepareStatement(deleteSQLrecordObjectRecord);
-            deletePreparedStatement.setString(1,recordObject.consignorName);
-            deletePreparedStatement.setString(2,recordObject.phone);
-            deletePreparedStatement.setString(3,recordObject.artistName);
-            deletePreparedStatement.setString(4,recordObject.title);
-            deletePreparedStatement.setDouble(5,recordObject.price);
-            deletePreparedStatement.setDate(6,recordObject.date);
+            deletePreparedStatement.setString(1,recordObject.getConsignorName());
+            deletePreparedStatement.setString(2,recordObject.getPhone());
+            deletePreparedStatement.setString(3,recordObject.getArtistName());
+            deletePreparedStatement.setString(4,recordObject.getTitle());
+            deletePreparedStatement.setDouble(5,recordObject.getPrice());
+            deletePreparedStatement.setDate(6,recordObject.getDate());
             deletePreparedStatement.execute();
             deletePreparedStatement.close();
             connection.close();
@@ -141,21 +166,24 @@ public class RecordDB {
             sqle.printStackTrace();
         }
     }
-    //defines method that updates record in the database.
-//    void updateRecord(RecordObject recordObject){
-//        try(Connection connection = DriverManager.getConnection(DB_CONNECTION_URL,USER,PASSWORD)){
-//            String updateSQLcubes = "UPDATE %s SET %s = ? WHERE %s = ?";
-//            String updateSQLcubesRecord = String.format(updateSQLcubes,TABLE_NAME,TIME_TAKEN_COLUMN,CUBE_SOLVER_COLUMN);
-//            PreparedStatement updatePreparedStatement = connection.prepareStatement(updateSQLcubesRecord);
-//            updatePreparedStatement.setDouble(1,cubes.time);
-//            updatePreparedStatement.setString(2,cubes.name);
-//            updatePreparedStatement.execute();
-//            updatePreparedStatement.close();
-//            connection.close();
-//        }catch (SQLException se){
-//            se.printStackTrace();
-//        }
-    //}
+    //method that deletes data from the bargain list table
+    void deleteBargainListItem(BargainListObject bargainListObject){
+        try(Connection connection = DriverManager.getConnection(DB_CONNECTION_URL,USER,PASSWORD)){
+            String deleteSQLbargainObject = "DELETE FROM %s WHERE %s = ? AND %s = ? AND %s = ? AND %s = ? AND %s = ?";
+            String deleteSQLbargainRecord = String.format(deleteSQLbargainObject,BARGAIN_TABLE_NAME,BARGAIN_CON_COL,
+                    BARGAIN_TITLE_COL,BARGAIN_ARTIST_NAME_COL,BARGAIN_BASE_PRICE_COL,BARGAIN_DATE_ADDED_COL);
+            PreparedStatement deletePreparedStatement = connection.prepareStatement(deleteSQLbargainRecord);
+            deletePreparedStatement.setString(1,bargainListObject.getConsignor());
+            deletePreparedStatement.setString(2,bargainListObject.getTitle());
+            deletePreparedStatement.setString(3,bargainListObject.getArtist());
+            deletePreparedStatement.setDouble(4,bargainListObject.getBasePrice());
+            deletePreparedStatement.setDate(5,bargainListObject.getDateAddedToBargainList());
+            deletePreparedStatement.execute();
+            deletePreparedStatement.close();
+        }catch (SQLException SQL){
+            SQL.printStackTrace();
+        }
+    }
     //defines method that displays record from the database
     ArrayList<RecordObject> fetchAllRecords() {
         ArrayList<RecordObject> allRecords = new ArrayList();
@@ -182,6 +210,7 @@ public class RecordDB {
             return null;
         }
     }
+    //defines method that displays sold items from the database
     ArrayList<RecordObjectSold> fetchAllSoldRecords(){
         ArrayList<RecordObjectSold> allSoldRecords = new ArrayList();
         try(Connection connection = DriverManager.getConnection(DB_CONNECTION_URL,USER,PASSWORD);
@@ -204,6 +233,7 @@ public class RecordDB {
             return null;
         }
     }
+    //defines method that displays pay info records from the database
     ArrayList<PayInfoObject> fetchAllPayInfoRecords(){
         ArrayList<PayInfoObject> allPayeeRecords = new ArrayList<>();
         try(Connection connection = DriverManager.getConnection(DB_CONNECTION_URL,USER,PASSWORD);
@@ -227,6 +257,7 @@ public class RecordDB {
             return null;
         }
     }
+    //defines method that displays bargain list records from the database
     ArrayList<BargainListObject> fetchAllBargainListRecords(){
         ArrayList<BargainListObject> allBargainListRecords = new ArrayList<>();
         try(Connection connection= DriverManager.getConnection(DB_CONNECTION_URL,USER,PASSWORD);
@@ -238,7 +269,8 @@ public class RecordDB {
                 String artistName = rs.getString(BARGAIN_ARTIST_NAME_COL);
                 String title = rs.getString(BARGAIN_TITLE_COL);
                 double basePrice = rs.getDouble(BARGAIN_BASE_PRICE_COL);
-                BargainListObject bargainListObject = new BargainListObject(consignorName,title,artistName,basePrice);
+                Date date = rs.getDate(BARGAIN_DATE_ADDED_COL);
+                BargainListObject bargainListObject = new BargainListObject(consignorName,title,artistName,basePrice, (java.sql.Date) date);
                 allBargainListRecords.add(bargainListObject);
             }
             rs.close();
@@ -250,5 +282,25 @@ public class RecordDB {
             return null;
         }
 
+    }
+    //defines method that displays donated item records from the database
+    ArrayList<DonatedItemObject> fetchAllDonatedItemRecords(){
+        ArrayList<DonatedItemObject> allDonatedItemRecords = new ArrayList<>();
+        try(Connection connection = DriverManager.getConnection(DB_CONNECTION_URL,USER,PASSWORD);
+        Statement statement = connection.createStatement()){
+            String selectSQLDonatedItemTable = "SELECT * FROM " + DONATED_ITEM_TABLE_NAME;
+            ResultSet rs = statement.executeQuery(selectSQLDonatedItemTable);
+            while (rs.next()){
+                String conName = rs.getString(DONATED_ITEM_CON_COL);
+                String title = rs.getString(DONATED_ITEM_TITLE_COL);
+                String aName = rs.getString(DONATED_ITEM_ARTIST_COL);
+                DonatedItemObject donatedItemObject = new DonatedItemObject(conName,title,aName);
+                allDonatedItemRecords.add(donatedItemObject);
+            }
+            return allDonatedItemRecords;
+        }catch (SQLException sql){
+            sql.printStackTrace();
+            return null;
+        }
     }
 }

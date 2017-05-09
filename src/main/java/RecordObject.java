@@ -1,24 +1,17 @@
 import java.util.Date;
 /**
- * Created by dilli on 4/25/2017.
+ This class creates inventory record object
  */
 public class RecordObject {
-    int ID;
-    String consignorName;
-    String phone;
-    String artistName;
-    String title;
-    double price;
-    java.sql.Date date;
+    //variables
+    private String consignorName;
+    private String phone;
+    private String artistName;
+    private String title;
+    private double price;
+    private java.sql.Date date;
 
-    public int getID() {
-        return ID;
-    }
-
-    public void setID(int ID) {
-        this.ID = ID;
-    }
-
+    //getters and setters
     public String getConsignorName() {
         return consignorName;
     }
@@ -69,7 +62,6 @@ public class RecordObject {
 
     //constructor
     RecordObject(String cName, String pn, String aName, String t, double pr,  java.sql.Date d){
-        //ID = id;
         consignorName = cName;
         phone = pn;
         artistName = aName;
@@ -77,6 +69,7 @@ public class RecordObject {
         price = pr;
         date = d;
     }
+    //a toString method
     @Override
     public String toString(){
         return "Consignor: " + consignorName + "   Phone: " + phone + "   Artist: "+ artistName + "   Title: " + title + "   Price: "+price;

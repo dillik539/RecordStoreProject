@@ -1,11 +1,24 @@
+
 /**
- * Created by dilli on 5/3/2017.
+ this class creates a bargain list object
  */
 public class BargainListObject {
-    String Consignor;
-    String Artist;
-    String Title;
-    double basePrice;
+    //variables
+    private String Consignor;
+    private String Artist;
+    private String Title;
+    private double basePrice;
+    private java.sql.Date dateAddedToBargainList;//sql date
+
+    //getters and setters
+    public java.sql.Date getDateAddedToBargainList() {
+        return dateAddedToBargainList;
+    }
+
+    public void setDateAddedToBargainList(java.sql.Date dateAddedToBargainList) {
+        this.dateAddedToBargainList = dateAddedToBargainList;
+    }
+
     public String getConsignor() {
         return Consignor;
     }
@@ -38,16 +51,19 @@ public class BargainListObject {
         Title = title;
     }
 
-
-    BargainListObject(String Cname, String title, String aName, double bPrice){
+    //a constructor
+    BargainListObject(String Cname, String title, String aName, double bPrice,java.sql.Date date){
         Consignor = Cname;
         Artist = aName;
         Title = title;
         basePrice = bPrice;
+        dateAddedToBargainList = date;
 
     }
+    //toString method
     @Override
     public String toString(){
-        return "Consignor: " + this.Consignor + "   Title: " + this.Title + "   Artist: " + this.Artist + "   Base Price: " + this.basePrice;
+        return "Consignor: " + this.Consignor + "   Title: " + this.Title + "   Artist: " + this.Artist + "   Base Price: " + this.basePrice
+                + "   Date Added: " + this.dateAddedToBargainList;
     }
 }
