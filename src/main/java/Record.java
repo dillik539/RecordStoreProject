@@ -29,6 +29,7 @@ public class Record extends JFrame{
     private RecordDBcontroller recordDBcontroller;
     //defines a constructor
     Record(RecordDBcontroller recordDBcontroller){
+        setTitle("Secondhand record store");
         setPreferredSize(new Dimension(900,400));
         this.recordDBcontroller = recordDBcontroller;
         //creates new ListModel objects
@@ -147,18 +148,18 @@ public class Record extends JFrame{
                     }
                 }
                 else if(AddToComboBox.getSelectedItem().equals("Bargain List")) {
-                    java.sql.Date recordAddedDate = InventoryJList.getSelectedValue().getDate();
-                    Date now = new Date();
-                    long date = now.getTime() - recordAddedDate.getTime(); //gets time difference of two dates
-                    long msInDay = 1000*60*60*24;//millisecond in one day
-                    long days = date/msInDay;//calculates number of days
-                    String StringDays = Long.toString(days);
-                    int intDays = Integer.parseInt(StringDays);//converts to int
-                    int maxDaysInInventory = 30;//number of days a record can stay in inventory list before it gets moved to bargain list
                     if (InventoryJList.getSelectedValue() == null) {
                         JOptionPane.showMessageDialog(Record.this, "Please select an item from the Inventory Records");
                     }
                     else{
+                        java.sql.Date recordAddedDate = InventoryJList.getSelectedValue().getDate();
+                        Date now = new Date();
+                        long date = now.getTime() - recordAddedDate.getTime(); //gets time difference of two dates
+                        long msInDay = 1000*60*60*24;//millisecond in one day
+                        long days = date/msInDay;//calculates number of days
+                        String StringDays = Long.toString(days);
+                        int intDays = Integer.parseInt(StringDays);//converts to int
+                        int maxDaysInInventory = 30;//number of days a record can stay in inventory list before it gets moved to bargain list
                         if (intDays < maxDaysInInventory) {
                         JOptionPane.showMessageDialog(Record.this, "Oops! can't add this item to Bargain list before 30 days\n" +
                                 "of it's stay in Inventory List");
