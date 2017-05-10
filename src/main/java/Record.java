@@ -13,7 +13,7 @@ public class Record extends JFrame{
     private JTextField ConsignorNameTextField,PriceTextField,TitleTextField,ArtistNameTextField,PhoneNoTextField;
     private JComboBox AddToComboBox,DisplayComboBox,ReturnComboBox;
     private JPanel rootPanel;
-    private JButton addRecordButton,showRecordButton,deleteRecordButton,displayNoOfDaysButton;
+    private JButton addRecordButton,showRecordButton,deleteRecordButton, quitButton;
     private JList<RecordObject> InventoryJList;
     private JList<RecordObjectSold> SoldItemJList;
     private JList<BargainListObject> BargainJList;
@@ -284,6 +284,12 @@ public class Record extends JFrame{
                         JOptionPane.showMessageDialog(Record.this, "The selected item has been deleted from the list");
                     }
                 }
+            }
+        });
+        quitButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.exit(0);
             }
         });
     }
